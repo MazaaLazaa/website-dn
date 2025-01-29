@@ -1,0 +1,116 @@
+---
+title: 'Scraping NBA.com API: Collecting and Storing Data Efficiently'
+publishedAt: '2024-04-09'
+summary: 'Learn how to scrape data from NBA.com API and store it in a database for analysis and insights.'
+---
+
+In the world of sports analytics, access to reliable and up-to-date data is crucial for making informed decisions. The **NBA.com API** serves as a valuable source of game statistics, player performance metrics, and historical data. 
+
+This article explores how to scrape data from the NBA.com API and store it efficiently in a database for further analysis.
+
+## Understanding the NBA.com API
+
+The **NBA.com API** provides structured data about teams, players, and games. While the API is not officially documented, developers often rely on network requests and third-party libraries to fetch data.
+
+To get started, we'll use **Python** and the `requests` library to access the API endpoints.
+
+## Fetching Data from NBA.com API
+
+To retrieve data, we first need to identify the API endpoints. Here’s how to fetch live game data using Python:
+
+```python
+import requests
+import json
+
+url = "https://stats.nba.com/stats/scoreboardv2"
+headers = {
+    "User-Agent": "Mozilla/5.0",
+    "Accept": "application/json"
+}
+params = {
+    "GameDate": "2024-01-29",
+    "LeagueID": "00",
+    "DayOffset": "0"
+}
+
+response = requests.get(url, headers=headers, params=params)
+data = response.json()
+print(json.dumps(data, indent=4))
+```
+
+This script sends a request to the **NBA.com API**, retrieves JSON data, and prints it in a readable format.
+
+## Storing Data in a Database
+
+Once we have the JSON data, we need to store it in a database for analysis. **PostgreSQL** or **SQLite** are great options for structured data storage.
+
+### Setting Up a Database
+
+Using SQLite for simplicity, let’s create a database and a table for NBA game stats:
+
+```python
+import sqlite3
+
+db = sqlite3.connect("nba_data.db")
+cursor = db.cursor()
+
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS games (
+    game_id TEXT PRIMARY KEY,
+    home_team TEXT,
+    away_team TEXT,
+    home_score INTEGER,
+    away_score INTEGER,
+    game_date TEXT
+)
+''')
+
+db.commit()
+```
+
+### Inserting Data into the Database
+
+Now, let's extract relevant information from the JSON response and store it:
+
+```python
+def save_game_data(data):
+    for game in data['resultSets'][0]['rowSet']:
+        game_id = game[2]
+        home_team = game[5]
+        away_team = game[6]
+        home_score = game[21]
+        away_score = game[22]
+        game_date = params["GameDate"]
+
+        cursor.execute('''
+        INSERT INTO games (game_id, home_team, away_team, home_score, away_score, game_date)
+        VALUES (?, ?, ?, ?, ?, ?)''',
+        (game_id, home_team, away_team, home_score, away_score, game_date))
+
+    db.commit()
+
+save_game_data(data)
+```
+
+This function extracts relevant game details and saves them to the **SQLite database**.
+
+## Querying and Using the Data
+
+Once stored, we can retrieve and analyze the data easily:
+
+```python
+cursor.execute("SELECT * FROM games")
+rows = cursor.fetchall()
+for row in rows:
+    print(row)
+```
+
+## Conclusion
+
+Scraping and storing **NBA.com API** data allows us to analyze player stats, game outcomes, and team performances efficiently. 
+
+By combining **Python** with **SQLite/PostgreSQL**, we can build a robust data pipeline for basketball analytics.
+
+This foundation opens the door to deeper insights, such as player efficiency ratings, team trends, and predictive modeling for upcoming games.
+
+For those passionate about sports data, mastering **data scraping and storage** is a game-changer in analytics!
