@@ -1,42 +1,46 @@
-import { baseUrl } from 'app/sitemap'
-import { getBlogPosts } from 'app/blog/utils'
+import { baseUrl } from 'app/sitemap';
+import { getBlogPosts } from 'app/blog/utils';
 
 export async function GET() {
-  let allBlogs = await getBlogPosts()
+  let allBlogs = (await getBlogPosts()) || []; // Ensure it's an array
 
   const itemsXml = allBlogs
+    .filter((post) => post && post.metadata && post.slug) // Prevent undefined errors
     .sort((a, b) => {
-      if (new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)) {
-        return -1
-      }
-      return 1
+      const dateA = new Date(a.metadata?.publishedAt || 0);
+      const dateB = new Date(b.metadata?.publishedAt || 0);
+      return dateB - dateA;
     })
-    .map(
-      (post) =>
-        `<item>
-          <title>${post.metadata.title}</title>
-          <link>${baseUrl}/blog/${post.slug}</link>
-          <description>${post.metadata.summary || ''}</description>
-          <pubDate>${new Date(
-            post.metadata.publishedAt
-          ).toUTCString()}</pubDate>
-        </item>`
-    )
-    .join('\n')
+    .map((post) => {
+      const title = post.metadata?.title || "Untitled";
+      const slug = post.slug || "unknown-slug";
+      const summary = post.metadata?.summary || "";
+      const pubDate = post.metadata?.publishedAt
+        ? new Date(post.metadata.publishedAt).toUTCString()
+        : new Date().toUTCString();
+
+      return `<item>
+        <title>${title}</title>
+        <link>${baseUrl || "https://defaulturl.com"}/blog/${slug}</link>
+        <description>${summary}</description>
+        <pubDate>${pubDate}</pubDate>
+      </item>`;
+    })
+    .join("\n");
 
   const rssFeed = `<?xml version="1.0" encoding="UTF-8" ?>
   <rss version="2.0">
     <channel>
         <title>My Portfolio</title>
-        <link>${baseUrl}</link>
+        <link>${baseUrl || "https://defaulturl.com"}</link>
         <description>This is my portfolio RSS feed</description>
         ${itemsXml}
     </channel>
-  </rss>`
+  </rss>`;
 
   return new Response(rssFeed, {
     headers: {
-      'Content-Type': 'text/xml',
+      "Content-Type": "text/xml",
     },
-  })
+  });
 }
