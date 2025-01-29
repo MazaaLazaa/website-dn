@@ -1,0 +1,55 @@
+---
+title: "How to Prevent SQL Injection and XSS Attacks in Web Applications"
+date: "2025-01-29"
+summary: "Learn how to secure your web applications against SQL Injection and Cross-Site Scripting (XSS) attacks with best practices and modern security techniques."
+---
+
+Web applications are prime targets for security vulnerabilities like **SQL Injection (SQLi)** and **Cross-Site Scripting (XSS)**. These attacks can compromise databases, steal user data, and disrupt services. In this guide, we’ll explore how to **prevent SQL Injection and XSS attacks** using best practices.
+
+## **Understanding SQL Injection**
+SQL Injection occurs when an attacker **injects malicious SQL queries** into input fields to manipulate a database.
+
+### **How SQL Injection Works**
+Example of a vulnerable SQL query:
+```sql
+SELECT * FROM users WHERE username = '" + userInput + "' AND password = '" + passwordInput + "';
+```
+If an attacker enters **' OR '1'='1** as `userInput`, the query becomes:
+```sql
+SELECT * FROM users WHERE username = '' OR '1'='1' AND password = '';
+```
+This grants unauthorized access to the entire database.
+
+### **How to Prevent SQL Injection**
+1. **Use Prepared Statements (Parameterized Queries)**:
+```python
+cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+```
+2. **Sanitize User Input** to remove unexpected characters.
+3. **Use ORM (Object-Relational Mapping)** frameworks like SQLAlchemy or Prisma to avoid raw queries.
+4. **Limit Database Privileges** to prevent unauthorized access.
+
+## **Understanding Cross-Site Scripting (XSS)**
+XSS attacks inject malicious scripts into web pages that execute in a user’s browser.
+
+### **Example of an XSS Attack**
+If a website allows unsanitized user input:
+```html
+<input type="text" name="comment" value="<script>alert('Hacked!');</script>">
+```
+This script executes on every page load, affecting users.
+
+### **How to Prevent XSS**
+1. **Escape HTML Characters**:
+```javascript
+const safeInput = input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+```
+2. **Use Content Security Policy (CSP)** to block unauthorized scripts:
+```html
+<meta http-equiv="Content-Security-Policy" content="default-src 'self';">
+```
+3. **Sanitize Inputs** using libraries like DOMPurify for JavaScript.
+4. **Validate User Input** before displaying it.
+
+## **Conclusion**
+Preventing SQL Injection and XSS is crucial for securing web applications. By using **prepared statements, sanitization, CSP, and input validation**, you can significantly reduce security risks. Stay proactive in securing your applications against these common vulnerabilities!
