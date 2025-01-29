@@ -1,0 +1,81 @@
+---
+
+title: 'Web Traffic Analysis: Extracting and Visualizing Google Analytics Data'
+publishedAt: '2024-03-10'
+summary: 'Learn how to fetch, analyze, and visualize website traffic using the Google Analytics API and Python.'
+---
+
+Tracking website traffic is essential for understanding user behavior, optimizing marketing campaigns, and improving website performance. With the **Google Analytics API**, we can extract data and visualize insights to make informed decisions.
+
+## **Getting Google Analytics API Access**
+1. **Enable the Google Analytics API** in Google Cloud Console.
+2. Create credentials and download the `credentials.json` file.
+3. Install required Python libraries:
+   ```bash
+   pip install google-auth google-auth-oauthlib google-auth-httplib2 googleapiclient pandas matplotlib
+   ```
+
+## **Fetching Website Traffic Data**
+Using the Google Analytics API, we can retrieve session data for a given timeframe.
+
+### **1. Authenticate and Connect to the API**
+```python
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+
+SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
+KEY_FILE_LOCATION = 'credentials.json'
+VIEW_ID = 'YOUR_VIEW_ID'
+
+# Authenticate
+credentials = service_account.Credentials.from_service_account_file(
+    KEY_FILE_LOCATION, scopes=SCOPES)
+
+analytics = build('analyticsreporting', 'v4', credentials=credentials)
+```
+
+### **2. Fetch Data from Google Analytics**
+```python
+def get_report():
+    return analytics.reports().batchGet(
+        body={
+            'reportRequests': [
+                {
+                    'viewId': VIEW_ID,
+                    'dateRanges': [{'startDate': '7daysAgo', 'endDate': 'today'}],
+                    'metrics': [{'expression': 'ga:sessions'}, {'expression': 'ga:pageviews'}],
+                    'dimensions': [{'name': 'ga:date'}]
+                }
+            ]
+        }
+    ).execute()
+
+data = get_report()
+```
+
+### **3. Process and Visualize the Data**
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Extract relevant data
+rows = data['reports'][0]['data']['rows']
+dates = [row['dimensions'][0] for row in rows]
+sessions = [int(row['metrics'][0]['values'][0]) for row in rows]
+
+# Convert to DataFrame
+df = pd.DataFrame({'Date': dates, 'Sessions': sessions})
+df['Date'] = pd.to_datetime(df['Date'])
+
+# Plot the data
+plt.figure(figsize=(10,5))
+plt.plot(df['Date'], df['Sessions'], marker='o', linestyle='-')
+plt.title('Website Sessions Over Time')
+plt.xlabel('Date')
+plt.ylabel('Sessions')
+plt.xticks(rotation=45)
+plt.show()
+```
+
+## **Conclusion**
+Using the **Google Analytics API** and Python, we can automate web traffic analysis and visualize user behavior trends. These insights help optimize marketing strategies and improve website performance.
