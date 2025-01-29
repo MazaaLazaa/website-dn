@@ -1,27 +1,3 @@
-import Layout from "@/components/Layout";
-import Image from "next/image";
-import Link from "next/link";
-
-const projects = [
-  {
-    title: "Pulaar - Afro-European Fashion Brand",
-    description: "A high-end unisex clothing brand with Afro-European influences.",
-    link: "https://pulaar.co",
-    image: "/images/pulaar.png",
-  },
-  {
-    title: "Sophie Lukacs - Kora Player",
-    description: "Personal website for Sophie Lukacs, a talented kora player.",
-    link: "https://sophielukacs.com",
-    image: "/images/sophie-lukacs.png",
-  },
-  {
-    title: "NBA Analytics Dashboard",
-    description: "An interactive dashboard for NBA data analysis using machine learning.",
-    link: "https://nba-analytics-demo.vercel.app",
-    image: "/images/nba-dashboard.png",
-  },
-];
 
 export default function Work() {
   return (
