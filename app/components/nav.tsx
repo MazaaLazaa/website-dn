@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-onst navItems = {
+const navItems = {
   '/': {
     name: 'home',
   },
