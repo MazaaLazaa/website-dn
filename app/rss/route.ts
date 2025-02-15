@@ -7,10 +7,15 @@ export async function GET() {
   const itemsXml = allBlogs
     .filter((post) => post && post.metadata && post.slug) // Prevent undefined errors
     .sort((a, b) => {
-      const dateA = new Date(a.metadata?.publishedAt || 0);
-      const dateB = new Date(b.metadata?.publishedAt || 0);
-      return dateB - dateA;
-    })
+  const dateA = new Date(a.metadata?.publishedAt || '');
+  const dateB = new Date(b.metadata?.publishedAt || '');
+  
+  if (dateA.getTime() && dateB.getTime()) {
+    return dateB.getTime() - dateA.getTime();
+  }
+  
+  return 0;
+})
     .map((post) => {
       const title = post.metadata?.title || "Untitled";
       const slug = post.slug || "unknown-slug";
